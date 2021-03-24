@@ -1,0 +1,16 @@
+{
+  "name": "artillery3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "artillery run --output results/report.json performanceassmnt3.yml && artillery report --output results/report.html results/report.json"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "artillery": "^1.6.2",
+    "faker": "^5.4.0"
+  }
+}

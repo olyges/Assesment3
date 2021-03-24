@@ -1,0 +1,60 @@
+config:
+  target: "https://api.todoist.com"
+  processor: "./my-functions.js" ## Bonus, integrate Faker JS
+  phases:
+    - duration: 1
+      arrivalRate: 1
+      name: "Phase 1"
+    - duration: 3
+      arrivalRate: 2
+      name: "Phase 2"     
+  defaults: 
+   headers:
+     Authorization: Bearer {{$processEnvironment.TOKEN}}
+     Content-type: application/json
+scenarios:
+  - flow:
+      - get: ## Get active tasks (all tasks regadless project)
+          url: "/rest/v1/tasks"
+
+      - function: "generateRandomData"  ## Bonus, integrate Faker JS 
+      - post:  ## Creating new proyect so we can create a task inside it
+          url: "/rest/v1/projects"
+          json:
+            name: "{{ name }}" ## Faker JS
+          capture:
+           json: "$.id"
+           as: "idproj"
+      - log: "Current id is {{ idproj }}"
+      
+      - post: ## Creating new task inside project recently created
+          url: "/rest/v1/tasks" 
+          json:
+            project_id: "{{ idproj }}"
+            content: "{{ task }}" ## Faker JS
+          capture:
+           json: "$.id"
+           as: "idtask"
+      - log: "Current id task is {{ idtask }}"
+
+      - get: ## Get an active task
+          url: "/rest/v1/tasks/{{ idtask }}"
+
+      - post: ## Update a task
+           url: "/rest/v1/tasks/{{ idtask }}"
+           json:
+            content: "{{ task }} updated" ## Faker JS 
+
+      - post: ## Complete or close a task
+           url: "/rest/v1/tasks/{{ idtask }}/close"
+
+      - post: ## Reopen a task
+           url: "/rest/v1/tasks/{{ idtask }}/reopen"                  
+
+      - delete: ## Delete a task
+           url: "/rest/v1/tasks/{{ idtask }}"     
+
+      - delete: ## Delete created project
+           url: "/rest/v1/projects/{{ idproj }}"             
+  
+# For more information: https://artillery.io/docs/script-reference/
